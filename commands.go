@@ -32,13 +32,13 @@ func printLocations(locations []string) {
 	}
 }
 
-func updateConfig(conf *pokeapi.Config, locationResponse *pokeapi.LocationResponse) {
+func updateConfig(conf *pokeapi.Config, locationResponse *pokeapi.LocationAreasResponse) {
 	conf.Next = locationResponse.Next
 	conf.Previous = locationResponse.Previous
 }
 
-func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationResponse, error) {
-	var locationResponse pokeapi.LocationResponse
+func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAreasResponse, error) {
+	var locationResponse pokeapi.LocationAreasResponse
 
 	data, found := conf.Cache.Get(url)
 	if found {

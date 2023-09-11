@@ -1,6 +1,6 @@
 package pokeapi
 
-type LocationResponse struct {
+type LocationAreasResponse struct {
 	Count    int     `json:"count"`
 	Next     *string `json:"next"`
 	Previous *string `json:"previous"`
@@ -10,7 +10,7 @@ type LocationResponse struct {
 	} `json:"results"`
 }
 
-func (resp LocationResponse) GetNames() []string {
+func (resp LocationAreasResponse) GetNames() []string {
 	names := make([]string, len(resp.Results))
 	for i, location := range resp.Results {
 		names[i] = location.Name

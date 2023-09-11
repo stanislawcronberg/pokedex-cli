@@ -45,22 +45,22 @@ func processResponse(resp *http.Response) ([]byte, error) {
 	return data, nil
 }
 
-func unmarshalLocationResponse(data []byte) (LocationResponse, error) {
-	var locations LocationResponse
+func unmarshalLocationResponse(data []byte) (LocationAreasResponse, error) {
+	var locations LocationAreasResponse
 	err := json.Unmarshal(data, &locations)
 	if err != nil {
-		return LocationResponse{}, fmt.Errorf("error unmarshalling data: %s", err)
+		return LocationAreasResponse{}, fmt.Errorf("error unmarshalling data: %s", err)
 	}
 	return locations, nil
 }
 
-func (c *Client) ListLocations(newURL *string, cache *pokecache.Cache) (LocationResponse, error) {
+func (c *Client) ListLocations(newURL *string, cache *pokecache.Cache) (LocationAreasResponse, error) {
 
 	fullURL := buildURL(newURL, "/location")
 
 	response, err := executeGetRequest(fullURL)
 	if err != nil {
-		return LocationResponse{}, err
+		return LocationAreasResponse{}, err
 	}
 	defer func() {
 		if err := response.Body.Close(); err != nil {
@@ -70,17 +70,17 @@ func (c *Client) ListLocations(newURL *string, cache *pokecache.Cache) (Location
 
 	data, err := processResponse(response)
 	if err != nil {
-		return LocationResponse{}, err
+		return LocationAreasResponse{}, err
 	}
 
 	err = cache.Add(&fullURL, data)
 	if err != nil {
-		return LocationResponse{}, err
+		return LocationAreasResponse{}, err
 	}
 
 	locations, err := unmarshalLocationResponse(data)
 	if err != nil {
-		return LocationResponse{}, err
+		return LocationAreasResponse{}, err
 	}
 
 	return locations, nil
