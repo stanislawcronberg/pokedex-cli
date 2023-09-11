@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/stanislawcronberg/pokedex-cli/internal/pokeapi"
+	"math/rand"
 	"os"
 )
 
@@ -92,6 +93,29 @@ func locationAreaPokemonsCallback(conf *pokeapi.Config, args ...string) error {
 	}
 
 	printItems(locationResponse.GetPokemonNames())
+
+	return nil
+}
+
+func catchPokemonCallback(conf *pokeapi.Config, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("no pokemon provided")
+	}
+
+	pokemonName := args[0]
+
+	pokemonResponse, err := conf.Client.GetPokemonResponse(pokemonName, conf.Cache)
+	if err != nil {
+		return err
+	}
+
+	// Catch the pokemon with a random chance depending on the BaseExperience of the pokemon
+	// The higher the BaseExperience, the lower the chance of catching the pokemon
+	if rand.Float32() < float32(pokemonResponse.BaseExperience)/1000 {
+		fmt.Printf("You caught %s!\n", pokemonName)
+	} else {
+		fmt.Printf("You failed to catch %s!\n", pokemonName)
+	}
 
 	return nil
 }
