@@ -26,9 +26,9 @@ func exitCallback(conf *pokeapi.Config, params []string) error {
 	return nil
 }
 
-func printLocations(locations []string) {
-	for _, location := range locations {
-		fmt.Println(location)
+func printItems(items []string) {
+	for _, item := range items {
+		fmt.Println(item)
 	}
 }
 
@@ -64,7 +64,7 @@ func nextLocationsCallback(conf *pokeapi.Config, params []string) error {
 	}
 
 	updateConfig(conf, &locationResponse)
-	printLocations(locationResponse.GetLocationNames())
+	printItems(locationResponse.GetLocationNames())
 	return nil
 }
 
@@ -75,7 +75,7 @@ func previousLocationsCallback(conf *pokeapi.Config, params []string) error {
 	}
 
 	updateConfig(conf, &locationResponse)
-	printLocations(locationResponse.GetLocationNames())
+	printItems(locationResponse.GetLocationNames())
 	return nil
 }
 
@@ -84,4 +84,14 @@ func locationAreaPokemonsCallback(conf *pokeapi.Config, params []string) error {
 		return fmt.Errorf("no location provided")
 	}
 
+	locationName := params[0]
+
+	locationResponse, err := conf.Client.GetLocationAreaResponse(locationName, conf.Cache)
+	if err != nil {
+		return err
+	}
+
+	printItems(locationResponse.GetPokemonNames())
+
+	return nil
 }

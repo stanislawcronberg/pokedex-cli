@@ -20,6 +20,7 @@ func buildURL(newURL *string, endpoint string) string {
 }
 
 func executeGetRequest(url string) (*http.Response, error) {
+	fmt.Println("URL: ", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %s", err)
@@ -45,7 +46,7 @@ func processResponse(resp *http.Response) ([]byte, error) {
 	return data, nil
 }
 
-func unmarshalLocationResponse(data []byte) (LocationAreasResponse, error) {
+func unmarshalLocationAreasResponse(data []byte) (LocationAreasResponse, error) {
 	var locations LocationAreasResponse
 	err := json.Unmarshal(data, &locations)
 	if err != nil {
@@ -54,9 +55,18 @@ func unmarshalLocationResponse(data []byte) (LocationAreasResponse, error) {
 	return locations, nil
 }
 
+func unmarshalLocationAreaResponse(data []byte) (LocationAreaResponse, error) {
+	var location LocationAreaResponse
+	err := json.Unmarshal(data, &location)
+	if err != nil {
+		return LocationAreaResponse{}, fmt.Errorf("error unmarshalling data: %s", err)
+	}
+	return location, nil
+}
+
 func (c *Client) GetLocationAreasResponse(newURL *string, cache *pokecache.Cache) (LocationAreasResponse, error) {
 
-	fullURL := buildURL(newURL, "/location")
+	fullURL := buildURL(newURL, "/location-area")
 
 	response, err := executeGetRequest(fullURL)
 	if err != nil {
@@ -78,10 +88,42 @@ func (c *Client) GetLocationAreasResponse(newURL *string, cache *pokecache.Cache
 		return LocationAreasResponse{}, err
 	}
 
-	locations, err := unmarshalLocationResponse(data)
+	locations, err := unmarshalLocationAreasResponse(data)
 	if err != nil {
 		return LocationAreasResponse{}, err
 	}
 
 	return locations, nil
+}
+
+func (c *Client) GetLocationAreaResponse(locationName string, cache *pokecache.Cache) (LocationAreaResponse, error) {
+
+	fullURL := buildURL(nil, "/location-area/"+locationName)
+
+	response, err := executeGetRequest(fullURL)
+	if err != nil {
+		return LocationAreaResponse{}, err
+	}
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			log.Printf("warning: failed to close response body: %v", err)
+		}
+	}()
+
+	data, err := processResponse(response)
+	if err != nil {
+		return LocationAreaResponse{}, err
+	}
+
+	err = cache.Add(&fullURL, data)
+	if err != nil {
+		return LocationAreaResponse{}, err
+	}
+
+	location, err := unmarshalLocationAreaResponse(data)
+	if err != nil {
+		return LocationAreaResponse{}, err
+	}
+
+	return location, nil
 }

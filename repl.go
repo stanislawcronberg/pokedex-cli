@@ -13,7 +13,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*pokeapi.Config) error
+	callback    func(*pokeapi.Config, []string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -37,6 +37,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapback",
 			description: "Lists previous locations in the Pokemon world",
 			callback:    previousLocationsCallback,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Lists Pokemon in a given location",
+			callback:    locationAreaPokemonsCallback,
 		},
 	}
 }
@@ -72,7 +77,7 @@ func StartRepl() {
 			continue
 		}
 
-		err := command.callback(&config)
+		err := command.callback(&config, input[1:])
 		if err != nil {
 			fmt.Printf("pokedex> Error executing command: %s\n", err)
 		}
