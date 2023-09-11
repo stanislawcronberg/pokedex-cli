@@ -41,11 +41,11 @@ func getCommands() map[string]cliCommand {
 	}
 }
 
-func cleanInput(input string) string {
+func cleanInput(input string) []string {
 	input = strings.TrimSpace(input)
 	input = strings.ToLower(input)
 	words := strings.Split(input, " ")
-	return words[0]
+	return words
 }
 
 func StartRepl() {
@@ -62,11 +62,11 @@ func StartRepl() {
 
 		input := cleanInput(scanner.Text())
 
-		if input == "" {
+		if len(input) == 0 {
 			continue
 		}
 
-		command, ok := commands[input]
+		command, ok := commands[input[0]]
 		if !ok {
 			fmt.Printf("pokedex> Unknown command: %s\n", input)
 			continue
