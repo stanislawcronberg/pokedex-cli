@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func helpCallback(conf *pokeapi.Config) error {
+func helpCallback(conf *pokeapi.Config, params []string) error {
 	fmt.Println("--------------------------------------------------------------")
 	fmt.Println("- Welcome to the Pokedex, a CLI tool for looking up Pokemon! -")
 	fmt.Println("--------------------------------------------------------------")
@@ -21,7 +21,7 @@ func helpCallback(conf *pokeapi.Config) error {
 	return nil
 }
 
-func exitCallback(conf *pokeapi.Config) error {
+func exitCallback(conf *pokeapi.Config, params []string) error {
 	defer os.Exit(0)
 	return nil
 }
@@ -57,7 +57,7 @@ func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAre
 	return locationResponse, nil
 }
 
-func nextLocationsCallback(conf *pokeapi.Config) error {
+func nextLocationsCallback(conf *pokeapi.Config, params []string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Next)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func nextLocationsCallback(conf *pokeapi.Config) error {
 	return nil
 }
 
-func previousLocationsCallback(conf *pokeapi.Config) error {
+func previousLocationsCallback(conf *pokeapi.Config, params []string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Previous)
 	if err != nil {
 		return err
