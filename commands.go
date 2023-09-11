@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func helpCallback(conf *pokeapi.Config, params []string) error {
+func helpCallback(conf *pokeapi.Config, args ...string) error {
 	fmt.Println("--------------------------------------------------------------")
 	fmt.Println("- Welcome to the Pokedex, a CLI tool for looking up Pokemon! -")
 	fmt.Println("--------------------------------------------------------------")
@@ -21,7 +21,7 @@ func helpCallback(conf *pokeapi.Config, params []string) error {
 	return nil
 }
 
-func exitCallback(conf *pokeapi.Config, params []string) error {
+func exitCallback(conf *pokeapi.Config, args ...string) error {
 	defer os.Exit(0)
 	return nil
 }
@@ -57,7 +57,7 @@ func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAre
 	return locationResponse, nil
 }
 
-func nextLocationsCallback(conf *pokeapi.Config, params []string) error {
+func nextLocationsCallback(conf *pokeapi.Config, args ...string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Next)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func nextLocationsCallback(conf *pokeapi.Config, params []string) error {
 	return nil
 }
 
-func previousLocationsCallback(conf *pokeapi.Config, params []string) error {
+func previousLocationsCallback(conf *pokeapi.Config, args ...string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Previous)
 	if err != nil {
 		return err
@@ -79,12 +79,12 @@ func previousLocationsCallback(conf *pokeapi.Config, params []string) error {
 	return nil
 }
 
-func locationAreaPokemonsCallback(conf *pokeapi.Config, params []string) error {
-	if len(params) == 0 {
+func locationAreaPokemonsCallback(conf *pokeapi.Config, args ...string) error {
+	if len(args) == 0 {
 		return fmt.Errorf("no location provided")
 	}
 
-	locationName := params[0]
+	locationName := args[0]
 
 	locationResponse, err := conf.Client.GetLocationAreaResponse(locationName, conf.Cache)
 	if err != nil {

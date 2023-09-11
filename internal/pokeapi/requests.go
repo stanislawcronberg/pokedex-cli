@@ -20,7 +20,6 @@ func buildURL(newURL *string, endpoint string) string {
 }
 
 func executeGetRequest(url string) (*http.Response, error) {
-	fmt.Println("URL: ", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %s", err)
