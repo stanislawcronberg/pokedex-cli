@@ -64,7 +64,7 @@ func nextLocationsCallback(conf *pokeapi.Config, params []string) error {
 	}
 
 	updateConfig(conf, &locationResponse)
-	printLocations(locationResponse.GetNames())
+	printLocations(locationResponse.GetLocationNames())
 	return nil
 }
 
@@ -75,6 +75,6 @@ func previousLocationsCallback(conf *pokeapi.Config, params []string) error {
 	}
 
 	updateConfig(conf, &locationResponse)
-	printLocations(locationResponse.GetNames())
+	printLocations(locationResponse.GetLocationNames())
 	return nil
 }

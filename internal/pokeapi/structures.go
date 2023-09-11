@@ -10,10 +10,27 @@ type LocationAreasResponse struct {
 	} `json:"results"`
 }
 
-func (resp LocationAreasResponse) GetNames() []string {
+type LocationAreaResponse struct {
+	PokemonEncounters []struct {
+		Pokemon struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"pokemon"`
+	}
+}
+
+func (resp LocationAreasResponse) GetLocationNames() []string {
 	names := make([]string, len(resp.Results))
 	for i, location := range resp.Results {
 		names[i] = location.Name
+	}
+	return names
+}
+
+func (resp LocationAreaResponse) GetPokemonNames() []string {
+	names := make([]string, len(resp.PokemonEncounters))
+	for i, encounter := range resp.PokemonEncounters {
+		names[i] = encounter.Pokemon.Name
 	}
 	return names
 }
