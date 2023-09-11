@@ -7,14 +7,14 @@ import (
 func TestCleanInput(t *testing.T) {
 	cases := []struct {
 		input    string
-		expected string
+		expected []string
 	}{
-		{"exit  ", "exit"},
-		{"    help     ", "help"},
-		{"    help me     ", "help"},
-		{"", ""},
-		{"    ", ""},
-		{"HELP", "help"},
+		{"exit  ", []string{"exit"}},
+		{"    help     ", []string{"help"}},
+		{"    help me     ", []string{"help", "me"}},
+		{"", []string{""}},
+		{"    ", []string{""}},
+		{"HELP", []string{"help"}},
 	}
 
 	for _, c := range cases {
@@ -22,8 +22,10 @@ func TestCleanInput(t *testing.T) {
 		if len(got) != len(c.expected) {
 			t.Errorf("Lengths differ. Expected %d, got %d", len(c.expected), len(got))
 		}
-		if got != c.expected {
-			t.Errorf("Expected %s, got %s", c.expected, got)
+		for i := range got {
+			if got[i] != c.expected[i] {
+				t.Errorf("At index %d: expected %s, got %s", i, c.expected[i], got[i])
+			}
 		}
 	}
 }

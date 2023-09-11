@@ -45,22 +45,31 @@ func processResponse(resp *http.Response) ([]byte, error) {
 	return data, nil
 }
 
-func unmarshalLocationResponse(data []byte) (LocationResponse, error) {
-	var locations LocationResponse
+func unmarshalLocationAreasResponse(data []byte) (LocationAreasResponse, error) {
+	var locations LocationAreasResponse
 	err := json.Unmarshal(data, &locations)
 	if err != nil {
-		return LocationResponse{}, fmt.Errorf("error unmarshalling data: %s", err)
+		return LocationAreasResponse{}, fmt.Errorf("error unmarshalling data: %s", err)
 	}
 	return locations, nil
 }
 
-func (c *Client) ListLocations(newURL *string, cache *pokecache.Cache) (LocationResponse, error) {
+func unmarshalLocationAreaResponse(data []byte) (LocationAreaResponse, error) {
+	var location LocationAreaResponse
+	err := json.Unmarshal(data, &location)
+	if err != nil {
+		return LocationAreaResponse{}, fmt.Errorf("error unmarshalling data: %s", err)
+	}
+	return location, nil
+}
 
-	fullURL := buildURL(newURL, "/location")
+func (c *Client) GetLocationAreasResponse(newURL *string, cache *pokecache.Cache) (LocationAreasResponse, error) {
+
+	fullURL := buildURL(newURL, "/location-area")
 
 	response, err := executeGetRequest(fullURL)
 	if err != nil {
-		return LocationResponse{}, err
+		return LocationAreasResponse{}, err
 	}
 	defer func() {
 		if err := response.Body.Close(); err != nil {
@@ -70,18 +79,50 @@ func (c *Client) ListLocations(newURL *string, cache *pokecache.Cache) (Location
 
 	data, err := processResponse(response)
 	if err != nil {
-		return LocationResponse{}, err
+		return LocationAreasResponse{}, err
 	}
 
 	err = cache.Add(&fullURL, data)
 	if err != nil {
-		return LocationResponse{}, err
+		return LocationAreasResponse{}, err
 	}
 
-	locations, err := unmarshalLocationResponse(data)
+	locations, err := unmarshalLocationAreasResponse(data)
 	if err != nil {
-		return LocationResponse{}, err
+		return LocationAreasResponse{}, err
 	}
 
 	return locations, nil
+}
+
+func (c *Client) GetLocationAreaResponse(locationName string, cache *pokecache.Cache) (LocationAreaResponse, error) {
+
+	fullURL := buildURL(nil, "/location-area/"+locationName)
+
+	response, err := executeGetRequest(fullURL)
+	if err != nil {
+		return LocationAreaResponse{}, err
+	}
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			log.Printf("warning: failed to close response body: %v", err)
+		}
+	}()
+
+	data, err := processResponse(response)
+	if err != nil {
+		return LocationAreaResponse{}, err
+	}
+
+	err = cache.Add(&fullURL, data)
+	if err != nil {
+		return LocationAreaResponse{}, err
+	}
+
+	location, err := unmarshalLocationAreaResponse(data)
+	if err != nil {
+		return LocationAreaResponse{}, err
+	}
+
+	return location, nil
 }

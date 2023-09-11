@@ -13,7 +13,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*pokeapi.Config) error
+	callback    func(*pokeapi.Config, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -38,14 +38,19 @@ func getCommands() map[string]cliCommand {
 			description: "Lists previous locations in the Pokemon world",
 			callback:    previousLocationsCallback,
 		},
+		"explore": {
+			name:        "explore {location-area}",
+			description: "Lists Pokemon in a given location",
+			callback:    locationAreaPokemonsCallback,
+		},
 	}
 }
 
-func cleanInput(input string) string {
+func cleanInput(input string) []string {
 	input = strings.TrimSpace(input)
 	input = strings.ToLower(input)
 	words := strings.Split(input, " ")
-	return words[0]
+	return words
 }
 
 func StartRepl() {
@@ -62,17 +67,22 @@ func StartRepl() {
 
 		input := cleanInput(scanner.Text())
 
-		if input == "" {
+		if len(input) == 0 {
 			continue
 		}
 
-		command, ok := commands[input]
+		var args []string
+		if len(input) > 1 {
+			args = input[1:]
+		}
+
+		command, ok := commands[input[0]]
 		if !ok {
 			fmt.Printf("pokedex> Unknown command: %s\n", input)
 			continue
 		}
 
-		err := command.callback(&config)
+		err := command.callback(&config, args...)
 		if err != nil {
 			fmt.Printf("pokedex> Error executing command: %s\n", err)
 		}

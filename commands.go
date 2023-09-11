@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func helpCallback(conf *pokeapi.Config) error {
+func helpCallback(conf *pokeapi.Config, args ...string) error {
 	fmt.Println("--------------------------------------------------------------")
 	fmt.Println("- Welcome to the Pokedex, a CLI tool for looking up Pokemon! -")
 	fmt.Println("--------------------------------------------------------------")
@@ -21,24 +21,24 @@ func helpCallback(conf *pokeapi.Config) error {
 	return nil
 }
 
-func exitCallback(conf *pokeapi.Config) error {
+func exitCallback(conf *pokeapi.Config, args ...string) error {
 	defer os.Exit(0)
 	return nil
 }
 
-func printLocations(locations []string) {
-	for _, location := range locations {
-		fmt.Println(location)
+func printItems(items []string) {
+	for _, item := range items {
+		fmt.Println(item)
 	}
 }
 
-func updateConfig(conf *pokeapi.Config, locationResponse *pokeapi.LocationResponse) {
+func updateConfig(conf *pokeapi.Config, locationResponse *pokeapi.LocationAreasResponse) {
 	conf.Next = locationResponse.Next
 	conf.Previous = locationResponse.Previous
 }
 
-func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationResponse, error) {
-	var locationResponse pokeapi.LocationResponse
+func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAreasResponse, error) {
+	var locationResponse pokeapi.LocationAreasResponse
 
 	data, found := conf.Cache.Get(url)
 	if found {
@@ -49,7 +49,7 @@ func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationRes
 		return locationResponse, nil
 	}
 
-	locationResponse, err := conf.Client.ListLocations(url, conf.Cache)
+	locationResponse, err := conf.Client.GetLocationAreasResponse(url, conf.Cache)
 	if err != nil {
 		return locationResponse, fmt.Errorf("error getting locations: %s", err)
 	}
@@ -57,24 +57,41 @@ func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationRes
 	return locationResponse, nil
 }
 
-func nextLocationsCallback(conf *pokeapi.Config) error {
+func nextLocationsCallback(conf *pokeapi.Config, args ...string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Next)
 	if err != nil {
 		return err
 	}
 
 	updateConfig(conf, &locationResponse)
-	printLocations(locationResponse.GetNames())
+	printItems(locationResponse.GetLocationNames())
 	return nil
 }
 
-func previousLocationsCallback(conf *pokeapi.Config) error {
+func previousLocationsCallback(conf *pokeapi.Config, args ...string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Previous)
 	if err != nil {
 		return err
 	}
 
 	updateConfig(conf, &locationResponse)
-	printLocations(locationResponse.GetNames())
+	printItems(locationResponse.GetLocationNames())
+	return nil
+}
+
+func locationAreaPokemonsCallback(conf *pokeapi.Config, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("no location provided")
+	}
+
+	locationName := args[0]
+
+	locationResponse, err := conf.Client.GetLocationAreaResponse(locationName, conf.Cache)
+	if err != nil {
+		return err
+	}
+
+	printItems(locationResponse.GetPokemonNames())
+
 	return nil
 }
