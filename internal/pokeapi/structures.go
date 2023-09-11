@@ -10,6 +10,9 @@ type LocationAreasResponse struct {
 	} `json:"results"`
 }
 
+// LocationAreaResponse stores part of the information from the
+// location-area endpoint of the PokeAPI, we are only interested
+// in the Pokémon we can find in each location
 type LocationAreaResponse struct {
 	PokemonEncounters []struct {
 		Pokemon struct {
