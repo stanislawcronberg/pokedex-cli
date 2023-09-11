@@ -54,7 +54,7 @@ func unmarshalLocationResponse(data []byte) (LocationAreasResponse, error) {
 	return locations, nil
 }
 
-func (c *Client) ListLocations(newURL *string, cache *pokecache.Cache) (LocationAreasResponse, error) {
+func (c *Client) GetLocationAreasResponse(newURL *string, cache *pokecache.Cache) (LocationAreasResponse, error) {
 
 	fullURL := buildURL(newURL, "/location")
 

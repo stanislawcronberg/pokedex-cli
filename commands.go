@@ -49,7 +49,7 @@ func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAre
 		return locationResponse, nil
 	}
 
-	locationResponse, err := conf.Client.ListLocations(url, conf.Cache)
+	locationResponse, err := conf.Client.GetLocationAreasResponse(url, conf.Cache)
 	if err != nil {
 		return locationResponse, fmt.Errorf("error getting locations: %s", err)
 	}
@@ -77,4 +77,11 @@ func previousLocationsCallback(conf *pokeapi.Config, params []string) error {
 	updateConfig(conf, &locationResponse)
 	printLocations(locationResponse.GetLocationNames())
 	return nil
+}
+
+func locationAreaPokemonsCallback(conf *pokeapi.Config, params []string) error {
+	if len(params) == 0 {
+		return fmt.Errorf("no location provided")
+	}
+
 }
