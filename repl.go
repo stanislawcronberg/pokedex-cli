@@ -13,7 +13,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*pokeapi.Config, ...string) error
+	callback    func(*pokeapi.SessionState, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -61,7 +61,7 @@ func cleanInput(input string) []string {
 func StartRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := getCommands()
-	config := pokeapi.Config{
+	config := pokeapi.SessionState{
 		Client: pokeapi.NewClient(),
 		Cache:  pokecache.NewCache(time.Minute * 5),
 	}

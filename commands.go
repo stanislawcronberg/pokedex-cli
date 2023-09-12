@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func helpCallback(conf *pokeapi.Config, args ...string) error {
+func helpCallback(conf *pokeapi.SessionState, args ...string) error {
 	fmt.Println("--------------------------------------------------------------")
 	fmt.Println("- Welcome to the Pokedex, a CLI tool for looking up Pokemon! -")
 	fmt.Println("--------------------------------------------------------------")
@@ -22,7 +22,7 @@ func helpCallback(conf *pokeapi.Config, args ...string) error {
 	return nil
 }
 
-func exitCallback(conf *pokeapi.Config, args ...string) error {
+func exitCallback(conf *pokeapi.SessionState, args ...string) error {
 	defer os.Exit(0)
 	return nil
 }
@@ -33,12 +33,12 @@ func printItems(items []string) {
 	}
 }
 
-func updateConfig(conf *pokeapi.Config, locationResponse *pokeapi.LocationAreasResponse) {
+func updateConfig(conf *pokeapi.SessionState, locationResponse *pokeapi.LocationAreasResponse) {
 	conf.Next = locationResponse.Next
 	conf.Previous = locationResponse.Previous
 }
 
-func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAreasResponse, error) {
+func getLocationResponse(conf *pokeapi.SessionState, url *string) (pokeapi.LocationAreasResponse, error) {
 	var locationResponse pokeapi.LocationAreasResponse
 
 	data, found := conf.Cache.Get(url)
@@ -58,7 +58,7 @@ func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAre
 	return locationResponse, nil
 }
 
-func nextLocationsCallback(conf *pokeapi.Config, args ...string) error {
+func nextLocationsCallback(conf *pokeapi.SessionState, args ...string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Next)
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func nextLocationsCallback(conf *pokeapi.Config, args ...string) error {
 	return nil
 }
 
-func previousLocationsCallback(conf *pokeapi.Config, args ...string) error {
+func previousLocationsCallback(conf *pokeapi.SessionState, args ...string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Previous)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func previousLocationsCallback(conf *pokeapi.Config, args ...string) error {
 	return nil
 }
 
-func locationAreaPokemonsCallback(conf *pokeapi.Config, args ...string) error {
+func locationAreaPokemonsCallback(conf *pokeapi.SessionState, args ...string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("no location provided")
 	}
@@ -97,7 +97,7 @@ func locationAreaPokemonsCallback(conf *pokeapi.Config, args ...string) error {
 	return nil
 }
 
-func catchPokemonCallback(conf *pokeapi.Config, args ...string) error {
+func catchPokemonCallback(conf *pokeapi.SessionState, args ...string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("no pokemon provided")
 	}
@@ -111,7 +111,7 @@ func catchPokemonCallback(conf *pokeapi.Config, args ...string) error {
 
 	// Catch the pokemon with a random chance depending on the BaseExperience of the pokemon
 	// The higher the BaseExperience, the lower the chance of catching the pokemon
-	if rand.Float32() < float32(pokemonResponse.BaseExperience)/1000 {
+	if rand.Float32() < float32(pokemonResponse.BaseExperience)/500 {
 		fmt.Printf("You caught %s!\n", pokemonName)
 	} else {
 		fmt.Printf("You failed to catch %s!\n", pokemonName)

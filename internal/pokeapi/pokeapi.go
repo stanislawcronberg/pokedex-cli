@@ -10,7 +10,7 @@ type Client struct {
 	httpClient http.Client
 }
 
-type Config struct {
+type SessionState struct {
 	Client   Client
 	Cache    *pokecache.Cache
 	Next     *string
