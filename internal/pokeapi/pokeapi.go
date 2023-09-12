@@ -13,6 +13,7 @@ type Client struct {
 type SessionState struct {
 	Client   Client
 	Cache    *pokecache.Cache
+	Pokedex  map[string]PokemonResponse
 	Next     *string
 	Previous *string
 }

@@ -102,6 +102,10 @@ func catchPokemonCallback(conf *pokeapi.SessionState, args ...string) error {
 		return fmt.Errorf("no pokemon provided")
 	}
 
+	if conf == nil {
+		return fmt.Errorf("no session state provided")
+	}
+
 	pokemonName := args[0]
 
 	pokemonResponse, err := conf.Client.GetPokemonResponse(pokemonName, conf.Cache)
@@ -112,10 +116,67 @@ func catchPokemonCallback(conf *pokeapi.SessionState, args ...string) error {
 	// Catch the pokemon with a random chance depending on the BaseExperience of the pokemon
 	// The higher the BaseExperience, the lower the chance of catching the pokemon
 	if rand.Float32() < float32(pokemonResponse.BaseExperience)/500 {
-		fmt.Printf("You caught %s!\n", pokemonName)
+
+		if pokemon, ok := conf.Pokedex[pokemonName]; ok {
+			fmt.Printf("You already caught %s!\n", pokemon.Name)
+			return nil
+		} else {
+			conf.Pokedex[pokemonName] = pokemonResponse
+			fmt.Printf("You caught %s!\n", pokemonName)
+			return nil
+		}
+
 	} else {
 		fmt.Printf("You failed to catch %s!\n", pokemonName)
 	}
+	return nil
+}
 
+func printPokemon(pokemon pokeapi.PokemonResponse) {
+	fmt.Printf("Name: %s\n", pokemon.Name)
+	fmt.Printf("Base Experience: %d\n", pokemon.BaseExperience)
+	fmt.Printf("Height: %d\n", pokemon.Height)
+	fmt.Printf("Weight: %d\n", pokemon.Weight)
+
+	fmt.Print("Abilities: ")
+	abilities := pokemon.GetAbilities()
+	for _, ability := range abilities {
+		fmt.Printf("%s ", ability)
+	}
+	fmt.Println()
+
+	fmt.Print("Moves: ")
+	moves := pokemon.GetMoves()
+	for i, move := range moves {
+		if i == 5 {
+			break
+		}
+		fmt.Printf("%s, ", move)
+	}
+	fmt.Println("... and", len(moves)-5, "more moves...")
+
+	fmt.Print("Types: ")
+	for _, t := range pokemon.GetTypes() {
+		fmt.Printf("%s, ", t)
+	}
+	fmt.Println()
+}
+
+func showPokemonsCallback(conf *pokeapi.SessionState, args ...string) error {
+	if len(conf.Pokedex) == 0 {
+		fmt.Println("You haven't caught any Pokemon yet!")
+	} else if len(args) == 0 {
+		for _, pokemon := range conf.Pokedex {
+			printPokemon(pokemon)
+			fmt.Println()
+		}
+	} else {
+		pokemonName := args[0]
+		if pokemon, ok := conf.Pokedex[pokemonName]; ok {
+			printPokemon(pokemon)
+		} else {
+			fmt.Printf("You haven't caught %s yet!\n", pokemonName)
+		}
+	}
 	return nil
 }

@@ -48,6 +48,11 @@ func getCommands() map[string]cliCommand {
 			description: "Catch a Pokemon",
 			callback:    catchPokemonCallback,
 		},
+		"pokemons": {
+			name:        "pokemons",
+			description: "Lists all caught Pokemon",
+			callback:    showPokemonsCallback,
+		},
 	}
 }
 
@@ -62,8 +67,9 @@ func StartRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := getCommands()
 	config := pokeapi.SessionState{
-		Client: pokeapi.NewClient(),
-		Cache:  pokecache.NewCache(time.Minute * 5),
+		Client:  pokeapi.NewClient(),
+		Cache:   pokecache.NewCache(time.Minute * 5),
+		Pokedex: make(map[string]pokeapi.PokemonResponse),
 	}
 
 	for {

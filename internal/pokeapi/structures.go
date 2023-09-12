@@ -322,3 +322,27 @@ func (resp LocationAreaResponse) GetPokemonNames() []string {
 	}
 	return names
 }
+
+func (resp PokemonResponse) GetAbilities() []string {
+	abilities := make([]string, len(resp.Abilities))
+	for i, ability := range resp.Abilities {
+		abilities[i] = ability.Ability.Name
+	}
+	return abilities
+}
+
+func (resp PokemonResponse) GetMoves() []string {
+	moves := make([]string, len(resp.Moves))
+	for i, move := range resp.Moves {
+		moves[i] = move.Move.Name
+	}
+	return moves
+}
+
+func (resp PokemonResponse) GetTypes() []string {
+	types := make([]string, len(resp.Types))
+	for i, type_ := range resp.Types {
+		types[i] = type_.Type.Name
+	}
+	return types
+}
