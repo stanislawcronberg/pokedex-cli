@@ -134,30 +134,29 @@ func catchPokemonCallback(conf *pokeapi.SessionState, args ...string) error {
 
 func printPokemon(pokemon pokeapi.PokemonResponse) {
 	fmt.Printf("Name: %s\n", pokemon.Name)
-	fmt.Printf("Base Experience: %d\n", pokemon.BaseExperience)
-	fmt.Printf("Height: %d\n", pokemon.Height)
-	fmt.Printf("Weight: %d\n", pokemon.Weight)
+	fmt.Printf("Base Experience:\n  - %d\n", pokemon.BaseExperience)
+	fmt.Printf("Height:\n  - %d\n", pokemon.Height)
+	fmt.Printf("Weight:\n  - %d\n", pokemon.Weight)
 
-	fmt.Print("Abilities: ")
+	fmt.Println("Abilities: ")
 	abilities := pokemon.GetAbilities()
 	for _, ability := range abilities {
-		fmt.Printf("%s ", ability)
+		fmt.Printf("  - %s \n", ability)
 	}
-	fmt.Println()
 
-	fmt.Print("Moves: ")
+	fmt.Println("Moves: ")
 	moves := pokemon.GetMoves()
 	for i, move := range moves {
 		if i == 5 {
 			break
 		}
-		fmt.Printf("%s, ", move)
+		fmt.Printf("  - %s \n", move)
 	}
-	fmt.Println("... and", len(moves)-5, "more moves...")
+	fmt.Println("  - ... and", len(moves)-5, "more moves")
 
-	fmt.Print("Types: ")
+	fmt.Println("Types: ")
 	for _, t := range pokemon.GetTypes() {
-		fmt.Printf("%s, ", t)
+		fmt.Printf("  - %s \n", t)
 	}
 	fmt.Println()
 }
@@ -165,18 +164,26 @@ func printPokemon(pokemon pokeapi.PokemonResponse) {
 func showPokemonsCallback(conf *pokeapi.SessionState, args ...string) error {
 	if len(conf.Pokedex) == 0 {
 		fmt.Println("You haven't caught any Pokemon yet!")
-	} else if len(args) == 0 {
-		for _, pokemon := range conf.Pokedex {
-			printPokemon(pokemon)
-			fmt.Println()
-		}
+		return nil
+	}
+
+	fmt.Println("You have caught the following Pokemon:")
+	for _, pokemon := range conf.Pokedex {
+		fmt.Printf("  - %s\n", pokemon.Name)
+	}
+	return nil
+}
+
+func inspectPokemonCallback(conf *pokeapi.SessionState, args ...string) error {
+	if len(args) == 0 {
+		fmt.Println("Please provide a pokemon name. For example: inspect pikachu")
+		return nil
+	}
+	pokemonName := args[0]
+	if pokemon, ok := conf.Pokedex[pokemonName]; ok {
+		printPokemon(pokemon)
 	} else {
-		pokemonName := args[0]
-		if pokemon, ok := conf.Pokedex[pokemonName]; ok {
-			printPokemon(pokemon)
-		} else {
-			fmt.Printf("You haven't caught %s yet!\n", pokemonName)
-		}
+		fmt.Printf("You haven't caught %s yet!\n", pokemonName)
 	}
 	return nil
 }
