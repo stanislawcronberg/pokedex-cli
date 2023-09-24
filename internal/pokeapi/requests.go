@@ -63,6 +63,15 @@ func unmarshalLocationAreaResponse(data []byte) (LocationAreaResponse, error) {
 	return location, nil
 }
 
+func unmarshalPokemonResponse(data []byte) (PokemonResponse, error) {
+	var pokemon PokemonResponse
+	err := json.Unmarshal(data, &pokemon)
+	if err != nil {
+		return PokemonResponse{}, fmt.Errorf("error unmarshalling data: %s", err)
+	}
+	return pokemon, nil
+}
+
 func (c *Client) GetLocationAreasResponse(newURL *string, cache *pokecache.Cache) (LocationAreasResponse, error) {
 
 	fullURL := buildURL(newURL, "/location-area")
@@ -125,4 +134,36 @@ func (c *Client) GetLocationAreaResponse(locationName string, cache *pokecache.C
 	}
 
 	return location, nil
+}
+
+func (c *Client) GetPokemonResponse(pokemonName string, cache *pokecache.Cache) (PokemonResponse, error) {
+
+	fullURL := buildURL(nil, "/pokemon/"+pokemonName)
+
+	response, err := executeGetRequest(fullURL)
+	if err != nil {
+		return PokemonResponse{}, err
+	}
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			log.Printf("warning: failed to close response body: %v", err)
+		}
+	}()
+
+	data, err := processResponse(response)
+	if err != nil {
+		return PokemonResponse{}, err
+	}
+
+	err = cache.Add(&fullURL, data)
+	if err != nil {
+		return PokemonResponse{}, err
+	}
+
+	pokemon, err := unmarshalPokemonResponse(data)
+	if err != nil {
+		return PokemonResponse{}, err
+	}
+
+	return pokemon, nil
 }

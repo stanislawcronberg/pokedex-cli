@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/stanislawcronberg/pokedex-cli/internal/pokeapi"
+	"math/rand"
 	"os"
 )
 
-func helpCallback(conf *pokeapi.Config, args ...string) error {
+func helpCallback(conf *pokeapi.SessionState, args ...string) error {
 	fmt.Println("--------------------------------------------------------------")
 	fmt.Println("- Welcome to the Pokedex, a CLI tool for looking up Pokemon! -")
 	fmt.Println("--------------------------------------------------------------")
@@ -21,7 +22,7 @@ func helpCallback(conf *pokeapi.Config, args ...string) error {
 	return nil
 }
 
-func exitCallback(conf *pokeapi.Config, args ...string) error {
+func exitCallback(conf *pokeapi.SessionState, args ...string) error {
 	defer os.Exit(0)
 	return nil
 }
@@ -32,12 +33,12 @@ func printItems(items []string) {
 	}
 }
 
-func updateConfig(conf *pokeapi.Config, locationResponse *pokeapi.LocationAreasResponse) {
+func updateConfig(conf *pokeapi.SessionState, locationResponse *pokeapi.LocationAreasResponse) {
 	conf.Next = locationResponse.Next
 	conf.Previous = locationResponse.Previous
 }
 
-func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAreasResponse, error) {
+func getLocationResponse(conf *pokeapi.SessionState, url *string) (pokeapi.LocationAreasResponse, error) {
 	var locationResponse pokeapi.LocationAreasResponse
 
 	data, found := conf.Cache.Get(url)
@@ -57,7 +58,7 @@ func getLocationResponse(conf *pokeapi.Config, url *string) (pokeapi.LocationAre
 	return locationResponse, nil
 }
 
-func nextLocationsCallback(conf *pokeapi.Config, args ...string) error {
+func nextLocationsCallback(conf *pokeapi.SessionState, args ...string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Next)
 	if err != nil {
 		return err
@@ -68,7 +69,7 @@ func nextLocationsCallback(conf *pokeapi.Config, args ...string) error {
 	return nil
 }
 
-func previousLocationsCallback(conf *pokeapi.Config, args ...string) error {
+func previousLocationsCallback(conf *pokeapi.SessionState, args ...string) error {
 	locationResponse, err := getLocationResponse(conf, conf.Previous)
 	if err != nil {
 		return err
@@ -79,7 +80,7 @@ func previousLocationsCallback(conf *pokeapi.Config, args ...string) error {
 	return nil
 }
 
-func locationAreaPokemonsCallback(conf *pokeapi.Config, args ...string) error {
+func locationAreaPokemonsCallback(conf *pokeapi.SessionState, args ...string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("no location provided")
 	}
@@ -93,5 +94,96 @@ func locationAreaPokemonsCallback(conf *pokeapi.Config, args ...string) error {
 
 	printItems(locationResponse.GetPokemonNames())
 
+	return nil
+}
+
+func catchPokemonCallback(conf *pokeapi.SessionState, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("no pokemon provided")
+	}
+
+	if conf == nil {
+		return fmt.Errorf("no session state provided")
+	}
+
+	pokemonName := args[0]
+
+	pokemonResponse, err := conf.Client.GetPokemonResponse(pokemonName, conf.Cache)
+	if err != nil {
+		return err
+	}
+
+	// Catch the pokemon with a random chance depending on the BaseExperience of the pokemon
+	// The higher the BaseExperience, the lower the chance of catching the pokemon
+	if rand.Float32() < float32(pokemonResponse.BaseExperience)/500 {
+
+		if pokemon, ok := conf.Pokedex[pokemonName]; ok {
+			fmt.Printf("You already caught %s!\n", pokemon.Name)
+			return nil
+		} else {
+			conf.Pokedex[pokemonName] = pokemonResponse
+			fmt.Printf("You caught %s!\n", pokemonName)
+			return nil
+		}
+
+	} else {
+		fmt.Printf("You failed to catch %s!\n", pokemonName)
+	}
+	return nil
+}
+
+func printPokemon(pokemon pokeapi.PokemonResponse) {
+	fmt.Printf("Name: %s\n", pokemon.Name)
+	fmt.Printf("Base Experience:\n  - %d\n", pokemon.BaseExperience)
+	fmt.Printf("Height:\n  - %d\n", pokemon.Height)
+	fmt.Printf("Weight:\n  - %d\n", pokemon.Weight)
+
+	fmt.Println("Abilities: ")
+	abilities := pokemon.GetAbilities()
+	for _, ability := range abilities {
+		fmt.Printf("  - %s \n", ability)
+	}
+
+	fmt.Println("Moves: ")
+	moves := pokemon.GetMoves()
+	for i, move := range moves {
+		if i == 5 {
+			break
+		}
+		fmt.Printf("  - %s \n", move)
+	}
+	fmt.Println("  - ... and", len(moves)-5, "more moves")
+
+	fmt.Println("Types: ")
+	for _, t := range pokemon.GetTypes() {
+		fmt.Printf("  - %s \n", t)
+	}
+	fmt.Println()
+}
+
+func showPokemonsCallback(conf *pokeapi.SessionState, args ...string) error {
+	if len(conf.Pokedex) == 0 {
+		fmt.Println("You haven't caught any Pokemon yet!")
+		return nil
+	}
+
+	fmt.Println("You have caught the following Pokemon:")
+	for _, pokemon := range conf.Pokedex {
+		fmt.Printf("  - %s\n", pokemon.Name)
+	}
+	return nil
+}
+
+func inspectPokemonCallback(conf *pokeapi.SessionState, args ...string) error {
+	if len(args) == 0 {
+		fmt.Println("Please provide a pokemon name. For example: inspect pikachu")
+		return nil
+	}
+	pokemonName := args[0]
+	if pokemon, ok := conf.Pokedex[pokemonName]; ok {
+		printPokemon(pokemon)
+	} else {
+		fmt.Printf("You haven't caught %s yet!\n", pokemonName)
+	}
 	return nil
 }
